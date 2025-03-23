@@ -8,6 +8,9 @@ const { v4: uuidv4 } = require('uuid');
 const fs = require('fs-extra');
 const path = require('path');
 
+// Create a new instance of the Auth class
+const Auth = require('./auth');
+const auth = new Auth();
 // Initialize Express app
 const app = express();
 const server = http.createServer(app);
@@ -86,6 +89,58 @@ app.delete('/users/:id', (req, res) => {
   users.splice(userIndex, 1);
   fs.writeJsonSync('users.json', users);
   res.json({message: 'User deleted successfully'});
+});
+
+// Login endpoint
+app.post('/login', (req, res) => {
+  const {id, username, password } = req.body;
+  const user = auth.validateUser(id,username, password);
+  if (!user) {
+    return res.status(401).json({ error: 'Invalid username or password' });
+  }
+  res.json({ message: 'Login successful', user });
+});
+
+// Register endpoint
+app.post('/register', (req, res) => {
+  const {id, username, password } = req.body;
+  const user = auth.addUser({id, username, password});
+  if (user.message) {
+    return res.status(400).json({ error: user.message });
+  }
+  res.json({ message: 'User registered successfully', user });
+});
+
+// Get all users endpoint
+app.get('/users', (req, res) => {
+  res.json(auth.getUsers());
+});
+
+// Get user by ID endpoint
+app.get('/users/:id', (req, res) => {
+  const user = auth.getUser(req.params.id);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+  res.json(user);
+});
+
+// Update user by ID endpoint
+app.put('/users/:id', (req, res) => {
+  const user = auth.updateUser(req.params.id, req.body);
+  if (user.message) {
+    return res.status(404).json({ error: user.message });
+  }
+  res.json({ message: 'User updated successfully', user });
+});
+
+// Delete user by ID endpoint
+app.delete('/users/:id', (req, res) => {
+  const message = auth.deleteUser(req.params.id);
+  if (message.message) {
+    return res.status(404).json({ error: message.message });
+  }
+  res.json(message);
 });
 
 // WebSocket handling
