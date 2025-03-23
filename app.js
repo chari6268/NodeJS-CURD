@@ -157,13 +157,13 @@ app.post('/firebase/:path', async (req, res) => {
   res.json(data);
 });
 
-app.patch('/firebase/:path', async (req, res) => {
-  const data = await updateData(req.params.path, req.body);
+app.patch('/firebase/:path/:id', async (req, res) => {
+  const data = await updateData(req.params.path, req.body,req.params.id);
   res.json(data);
 });
 
-app.delete('/firebase/:path', async (req, res) => {
-  const data = await deleteData(req.params.path);
+app.delete('/firebase/:path/:id', async (req, res) => {
+  const data = await deleteData(req.params.path,req.body.id);
   res.json(data);
 });
 
