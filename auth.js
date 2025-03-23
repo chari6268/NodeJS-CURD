@@ -1,4 +1,5 @@
 const fs = require('fs-extra');
+const {fetchData, writeData, updateData, deleteData ,fetchDataById} = require('./firebaseDB');
 class Auth {
     constructor() {
         this.users = fs.readJsonSync('users.json', { throws: false }) || [];
@@ -40,4 +41,14 @@ class Auth {
         return {message: 'User deleted successfully'};
     }
 }
-module.exports = Auth;
+class LoginAuth {
+    constructor() {
+        this.users = async () => await fetchData('users');
+    }
+    static async validateUser(username, password) {
+        const users = await fetchData('users');
+        const cleanData = users.filter(item => item !== null);
+        return cleanData.find((user) => user.username === username && user.password === password);
+    }
+}
+module.exports = {Auth, LoginAuth};

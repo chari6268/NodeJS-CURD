@@ -9,7 +9,7 @@ const fs = require('fs-extra');
 const path = require('path');
 
 // Create a new instance of the Auth class
-const Auth = require('./auth');
+const {Auth,LoginAuth} = require('./auth');
 const auth = new Auth();
 
 const {fetchData, writeData, updateData, deleteData,fetchDataById} = require('./firebaseDB');
@@ -171,6 +171,16 @@ app.get('/firebase/:path/:id', async (req, res) => {
   const data = await fetchDataById(req.params.path,req.params.id);
   res.json(data);
 });
+
+app.post('/loginAuth', async (req, res) => {
+  const {username, password } = req.body;
+  const user = await LoginAuth.validateUser(username, password);
+  if (!user) {
+    return res.status(401).json({ error: 'Invalid username or password' });
+  }
+  res.json({ message: 'Login successful', user });
+});
+
 // WebSocket handling
 wss.on('connection', (ws) => {
   console.log('Client connected');
