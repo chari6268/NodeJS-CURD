@@ -11,6 +11,9 @@ const path = require('path');
 // Create a new instance of the Auth class
 const Auth = require('./auth');
 const auth = new Auth();
+
+const {fetchData, writeData, updateData, deleteData,fetchDataById} = require('./firebaseDB');
+
 // Initialize Express app
 const app = express();
 const server = http.createServer(app);
@@ -143,6 +146,31 @@ app.delete('/users/:id', (req, res) => {
   res.json(message);
 });
 
+// Sample Firebase REST endpoints
+app.get('/firebase/:path', async (req, res) => {
+  const data = await fetchData(req.params.path);
+  res.json(data);
+});
+
+app.post('/firebase/:path', async (req, res) => {
+  const data = await writeData(req.params.path, req.body,req.body.id);
+  res.json(data);
+});
+
+app.patch('/firebase/:path', async (req, res) => {
+  const data = await updateData(req.params.path, req.body);
+  res.json(data);
+});
+
+app.delete('/firebase/:path', async (req, res) => {
+  const data = await deleteData(req.params.path);
+  res.json(data);
+});
+
+app.get('/firebase/:path/:id', async (req, res) => {
+  const data = await fetchDataById(req.params.path,req.params.id);
+  res.json(data);
+});
 // WebSocket handling
 wss.on('connection', (ws) => {
   console.log('Client connected');
