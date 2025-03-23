@@ -181,6 +181,7 @@ app.post('/loginAuth', async (req, res) => {
   res.json({ message: 'Login successful', user });
 });
 
+
 // WebSocket handling
 wss.on('connection', (ws) => {
   console.log('Client connected');

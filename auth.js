@@ -48,7 +48,25 @@ class LoginAuth {
     static async validateUser(username, password) {
         const users = await fetchData('users');
         const cleanData = users.filter(item => item !== null);
-        return cleanData.find((user) => user.username === username && user.password === password);
+        if(cleanData.find((user) => user.username === username && user.password === password)) {
+            const userLoginStatus = {username, status: 'active', timestamp: new Date().toISOString(), token: Math.random().toString(36).substring(7)};
+            return this.addUserLoginStatus(userLoginStatus);;
+        }
+        return false;
+    }
+    static async addUserLoginStatus(user) {
+        const users = await fetchData('loginStatus');
+        const usersArray = Array.isArray(users) ? 
+        users.filter(Boolean) : 
+        Object.values(users || {}).filter(Boolean);
+        if(usersArray.find((u) => u.username === user.username)) {
+            const userIndex = usersArray.findIndex((u) => u.username === user.username);
+            usersArray[userIndex] = user;
+            await updateData('loginStatus', user, user.username);
+            return user;
+        }
+        await writeData('loginStatus', user, user.username);
+        return user;
     }
 }
 module.exports = {Auth, LoginAuth};
