@@ -190,7 +190,7 @@ app.post('/validateToken', async (req, res) => {
   if (!user) {
     return res.status(401).json({ error: 'Invalid token' });
   }
-  res.json({ message: 'Token is valid', user });
+  res.json({ message: true, user });
 });
 
 
