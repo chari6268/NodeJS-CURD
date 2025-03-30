@@ -1,4 +1,5 @@
 const fs = require('fs-extra');
+const jwt = require('jsonwebtoken');
 const {fetchData, writeData, updateData, deleteData ,fetchDataById} = require('./firebaseDB');
 class Auth {
     constructor() {
@@ -49,7 +50,8 @@ class LoginAuth {
         const users = await fetchData('users');
         const cleanData = users.filter(item => item !== null);
         if(cleanData.find((user) => user.username === username && user.password === password)) {
-            const userLoginStatus = {username, status: 'active', timestamp: new Date().toISOString(), token: Math.random().toString(36).substring(7)};
+            // generate jwt token and return it
+            const userLoginStatus = {username, status: 'active', timestamp: new Date().toISOString(), token: jwt.sign({username}, process.env.JWT_SECRET, {expiresIn: '1h'})};
             return this.addUserLoginStatus(userLoginStatus);;
         }
         return false;

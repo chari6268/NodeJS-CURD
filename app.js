@@ -8,6 +8,9 @@ const { v4: uuidv4 } = require('uuid');
 const fs = require('fs-extra');
 const path = require('path');
 
+// include jwt token
+const jwt = require('jsonwebtoken');
+
 // Create a new instance of the Auth class
 const {Auth,LoginAuth} = require('./auth');
 const auth = new Auth();
@@ -178,7 +181,7 @@ app.post('/loginAuth', async (req, res) => {
   if (!user) {
     return res.status(401).json({ error: 'Invalid username or password' });
   }
-  res.json({ message: 'Login successful', user });
+  res.json({ token: user.token, message: 'Login successful', user });
 });
 
 
