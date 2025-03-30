@@ -46,6 +46,16 @@ class LoginAuth {
     constructor() {
         this.users = async () => await fetchData('users');
     }
+    // validate token and return user details
+    static async validateToken(token) {
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const user = await fetchDataById('loginStatus', decoded.username);
+            return user;
+        } catch (err) {
+            return false;
+        }
+    }
     static async validateUser(username, password) {
         const users = await fetchData('users');
         const cleanData = users.filter(item => item !== null);

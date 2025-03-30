@@ -184,6 +184,15 @@ app.post('/loginAuth', async (req, res) => {
   res.json({ token: user.token, message: 'Login successful', user });
 });
 
+app.post('/validateToken', async (req, res) => {
+  const token = req.body.token;
+  const user = await LoginAuth.validateToken(token);
+  if (!user) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+  res.json({ message: 'Token is valid', user });
+});
+
 
 // WebSocket handling
 wss.on('connection', (ws) => {
