@@ -1,4 +1,5 @@
 import { fetchData, writeData } from './firebaseDB.js';
+const { v4: uuidv4 } = require('uuid');
 
 class Employee {
     constructor() {
@@ -14,8 +15,9 @@ class Employee {
         if (employeeAlreadyPresent.find((e) => e.email === data.email)) {
             return { message: 'Employee already present with this email' };
         }
-
-        await writeData('employee', data, data.email);
+        const employeeId = uuidv4();
+        data.id = employeeId;
+        await writeData('employee', data, data.id);
         return data;
     }
 }
