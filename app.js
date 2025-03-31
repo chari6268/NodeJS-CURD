@@ -199,7 +199,7 @@ app.post('/employee/create', async (req, res) => {
   const { name,email,password,role,hrID } = req.body;
   const employee = await Employee.addEmployee({ name,email,password,role,hrID });
   if (employee.message) {
-    return res.status(400).json({ error: employee.message });
+    return res.json({ error: employee.message });
   }
   res.json({ message: 'Employee created successfully', employee });
 });
