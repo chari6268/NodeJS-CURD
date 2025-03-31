@@ -209,6 +209,24 @@ app.get('/employee/', async (req, res) => {
   res.json(employees);
 });
 
+app.get('/employee/:id', async (req, res) => {
+  const employee = await fetchDataById('employee',req.params.id);
+  if (!employee) {
+    return res.status(404).json({ error: 'Employee not found' });
+  }
+  res.json(employee);
+}
+);
+
+app.put('/employee/:id', async (req, res) => {
+  const employee = await Employee.updateEmployee(req.body, req.params.id);
+  if (employee.message) {
+    return res.json({ error: employee.message });
+  }
+  res.json({ message: 'Employee updated successfully', employee });
+}
+);
+
 
 // WebSocket handling
 wss.on('connection', (ws) => {

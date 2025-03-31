@@ -1,5 +1,5 @@
 import { fetchData, writeData } from './firebaseDB.js';
-const { v4: uuidv4 } = require('uuid');
+import { v4 as uuidv4 } from 'uuid';
 
 class Employee {
     constructor() {
@@ -18,6 +18,20 @@ class Employee {
         const employeeId = uuidv4();
         data.id = employeeId;
         await writeData('employee', data, data.id);
+        return data;
+    }
+
+    // update employee by id
+    static async updateEmployee(data, id) {
+        const employees = await fetchData('employee');
+        const employeeAlreadyPresent = Array.isArray(employees)
+            ? employees.filter(Boolean)
+            : Object.values(employees || {}).filter(Boolean);
+            
+        if (!employeeAlreadyPresent.find((e) => e.id === id)) {
+            return { message: 'Employee not found' };
+        }
+        await writeData('employee', data, id);
         return data;
     }
 }
