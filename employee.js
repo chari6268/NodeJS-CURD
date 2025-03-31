@@ -6,7 +6,7 @@ class Employee {
     }
 
     static async addEmployee(data) {
-        const employees = await fetchData('employees');
+        const employees = await fetchData('employee');
         const employeeAlreadyPresent = Array.isArray(employees)
             ? employees.filter(Boolean)
             : Object.values(employees || {}).filter(Boolean);
@@ -15,7 +15,7 @@ class Employee {
             return { message: 'Employee already present with this email' };
         }
 
-        await writeData('employees', data, data.email);
+        await writeData('employee', data, data.email);
         return data;
     }
 }

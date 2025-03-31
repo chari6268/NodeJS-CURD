@@ -205,7 +205,7 @@ app.post('/employee/create', async (req, res) => {
 });
 
 app.get('/employee/', async (req, res) => {
-  const employees = await fetchData('employees');
+  const employees = await fetchData('employee');
   res.json(employees);
 });
 
