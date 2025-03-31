@@ -14,6 +14,8 @@ const jwt = require('jsonwebtoken');
 // Create a new instance of the Auth class
 const {Auth,LoginAuth} = require('./auth');
 const auth = new Auth();
+const {Employee} = require('./employee');
+
 
 const {fetchData, writeData, updateData, deleteData,fetchDataById} = require('./firebaseDB');
 
@@ -191,6 +193,20 @@ app.post('/validateToken', async (req, res) => {
     return res.status(401).json({ error: 'Invalid token' });
   }
   res.json({ message: true, user });
+});
+
+app.post('/employee/create', async (req, res) => {
+  const { name,email,password,role,hrID } = req.body;
+  const employee = await Employee.addEmployee({ name,email,password,role,hrID });
+  if (employee.message) {
+    return res.status(400).json({ error: employee.message });
+  }
+  res.json({ message: 'Employee created successfully', employee });
+});
+
+app.get('/employee/', async (req, res) => {
+  const employees = await fetchData('employees');
+  res.json(employees);
 });
 
 
