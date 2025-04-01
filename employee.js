@@ -55,7 +55,8 @@ class Employee {
                 employee.token = uuidv4();
                 employee.status = 'active';
             }
-            this.updateEmployee(employee, employee.id);
+            // update employee in firebase
+            await writeData('employee', employee, employee.id);
         }
         return employee;
     }
