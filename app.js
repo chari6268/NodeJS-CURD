@@ -195,6 +195,16 @@ app.post('/validateToken', async (req, res) => {
   res.json({ message: true, user });
 });
 
+
+app.post('/employee/login', async (req, res) => {
+  const { email, password } = req.body;
+  const employee = await Employee.loginEmployee(email, password);
+  if (employee.message) {
+    return res.json({ error: employee.message });
+  }
+  res.json({ message: 'Login successful', employee });
+});
+
 app.post('/employee/create', async (req, res) => {
   const { name,email,password,role,hrID } = req.body;
   const employee = await Employee.addEmployee({ name,email,password,role,hrID });

@@ -34,6 +34,31 @@ class Employee {
         await writeData('employee', data, id);
         return data;
     }
+
+    // login employee by email and password
+    static async loginEmployee(email, password) {
+        const employees = await fetchData('employee');
+        const employeeAlreadyPresent = Array.isArray(employees)
+            ? employees.filter(Boolean)
+            : Object.values(employees || {}).filter(Boolean);
+            
+        const employee = employeeAlreadyPresent.find((e) => e.email === email && e.password === password);
+        if (!employee) {
+            return { message: 'Invalid email or password' };
+        }else{
+            // insert token and status if not present
+            if(!employee.token) {
+                employee.token = uuidv4();
+            }if(!employee.status) {
+                employee.status = 'active';
+            }else {
+                employee.token = uuidv4();
+                employee.status = 'active';
+            }
+            this.updateEmployee(employee, employee.id);
+        }
+        return employee;
+    }
 }
 
 export { Employee };
