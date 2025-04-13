@@ -7,6 +7,10 @@ const cookieParser = require('cookie-parser');
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs-extra');
 const path = require('path');
+const multer = require('multer');
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 // include jwt token
 const jwt = require('jsonwebtoken');
@@ -31,6 +35,8 @@ app.use(cors()); // Enable CORS
 app.use(cookieParser()); // Parse cookies
 app.use(express.json()); // Parse JSON request bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
+
+app.use(express.json({ limit: '50mb' }));
 
 // Simple logging middleware
 app.use((req, res, next) => {
@@ -237,6 +243,80 @@ app.put('/employee/:id', async (req, res) => {
 }
 );
 
+app.post('/store-document', upload.single('image'), async (req, res) => {
+  try {
+    console.log("Request body:", req.body);
+    console.log("Request file:", req.file);
+    
+    const docKey = req.body.docKey;
+    const imageFile = req.file;
+    
+    if (!docKey || !imageFile) {
+      return res.status(400).json({ 
+        error: 'Missing required data',
+        receivedDocKey: !!docKey,
+        receivedFile: !!imageFile
+      });
+    }
+    
+    // Create a unique ID for the document
+    const timestamp = Date.now();
+    const documentId = `${docKey}_${timestamp}`;
+    
+    // Convert the file buffer to base64
+    const base64Data = imageFile.buffer.toString('base64');
+    const dataUri = `data:${imageFile.mimetype};base64,${base64Data}`;
+    
+    // Prepare document data
+    const documentData = {
+      id: documentId,
+      docKey,
+      name: imageFile.originalname,
+      type: imageFile.mimetype,
+      size: imageFile.size,
+      timestamp,
+      base64Data: dataUri,
+      uploadedAt: new Date().toISOString()
+    };
+    
+    // Store using REST API
+    await writeData('documents', documentData, documentId);
+    
+    // Return success response
+    res.status(200).json({
+      success: true,
+      id: documentId,
+      message: 'Document stored successfully'
+    });
+    
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).json({ 
+      error: 'Server error during upload',
+      message: error.message,
+      code: error.code
+    });
+  }
+});
+
+app.get('/documents/:docKey', async (req, res) => {
+  const docKey = req.params.docKey;
+  let documents = await fetchData('documents');
+
+  // Ensure documents is an array
+  documents = Array.isArray(documents)
+    ? documents
+    : Object.values(documents || {});
+
+  // Filter documents by docKey
+  const filteredDocuments = documents.filter(doc => doc.docKey === docKey);
+
+  if (filteredDocuments.length === 0) {
+    return res.status(404).json({ error: 'No documents found for this key' });
+  }
+
+  res.json(filteredDocuments);
+});
 
 // WebSocket handling
 wss.on('connection', (ws) => {
