@@ -245,11 +245,9 @@ app.put('/employee/:id', async (req, res) => {
 
 app.post('/store-document', upload.single('image'), async (req, res) => {
   try {
-    console.log("Request body:", req.body);
-    console.log("Request file:", req.file);
-    
     const docKey = req.body.docKey;
     const imageFile = req.file;
+    const userId = req.body.userId;
     
     if (!docKey || !imageFile) {
       return res.status(400).json({ 
@@ -259,15 +257,12 @@ app.post('/store-document', upload.single('image'), async (req, res) => {
       });
     }
     
-    // Create a unique ID for the document
     const timestamp = Date.now();
     const documentId = `${docKey}_${timestamp}`;
-    
-    // Convert the file buffer to base64
+
     const base64Data = imageFile.buffer.toString('base64');
     const dataUri = `data:${imageFile.mimetype};base64,${base64Data}`;
     
-    // Prepare document data
     const documentData = {
       id: documentId,
       docKey,
@@ -278,11 +273,8 @@ app.post('/store-document', upload.single('image'), async (req, res) => {
       base64Data: dataUri,
       uploadedAt: new Date().toISOString()
     };
-    
-    // Store using REST API
-    await writeData('documents', documentData, documentId);
-    
-    // Return success response
+    const path = `${userId}/${documentId}`;
+    await writeData('documents', documentData, path);
     res.status(200).json({
       success: true,
       id: documentId,
@@ -299,23 +291,22 @@ app.post('/store-document', upload.single('image'), async (req, res) => {
   }
 });
 
-app.get('/documents/:docKey', async (req, res) => {
-  const docKey = req.params.docKey;
-  let documents = await fetchData('documents');
+// get all documents for a user
+app.get('/documents/:userId', async (req, res) => {
+  const userId = req.params.userId;
+  const path = `documents/${userId}`; // Construct the path using userId
+  let documents = await fetchData(path);
 
   // Ensure documents is an array
   documents = Array.isArray(documents)
     ? documents
     : Object.values(documents || {});
 
-  // Filter documents by docKey
-  const filteredDocuments = documents.filter(doc => doc.docKey === docKey);
-
-  if (filteredDocuments.length === 0) {
-    return res.status(404).json({ error: 'No documents found for this key' });
+  if (documents.length === 0) {
+    return res.status(404).json({ error: 'No documents found for this user' });
   }
 
-  res.json(filteredDocuments);
+  res.json(documents);
 });
 
 // WebSocket handling
